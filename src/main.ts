@@ -1,4 +1,10 @@
 import './style.css';
+import {
+  createViewer,
+  showClickerPreview,
+  exportCurrentPreviewAsSTL,
+} from './viewer';
+
 
 type Point = {
   x: number;
@@ -42,15 +48,27 @@ app.innerHTML = `
           </label>
 
           <button id="traceButton">Trace / Update Preview</button>
+          <button id="exportStlButton" type="button">Download STL</button>
 
           <p id="statusText" class="status">Waiting for image...</p>
         </aside>
 
         <section class="previewGrid">
-          <div class="card">
-            <h2>Original</h2>
-            <canvas id="sourceCanvas" width="420" height="420"></canvas>
-          </div>
+  <div class="card viewerCard">
+    <h2>3D preview</h2>
+    <div id="viewer"></div>
+  </div>
+
+  <div class="card">
+    <h2>Original</h2>
+    <canvas id="sourceCanvas" width="420" height="420"></canvas>
+  </div>
+
+  <div class="card">
+    <h2>Detected clicker shape</h2>
+    <canvas id="outlineCanvas" width="420" height="420"></canvas>
+  </div>
+</section>
 
           <div class="card">
             <h2>Detected clicker shape</h2>
@@ -64,6 +82,7 @@ app.innerHTML = `
 
 const imageInput = document.querySelector<HTMLInputElement>('#imageInput')!;
 const traceButton = document.querySelector<HTMLButtonElement>('#traceButton')!;
+const exportStlButton = document.querySelector<HTMLButtonElement>('#exportStlButton')!;
 
 const thresholdSlider = document.querySelector<HTMLInputElement>('#thresholdSlider')!;
 const mergeSlider = document.querySelector<HTMLInputElement>('#mergeSlider')!;
@@ -85,6 +104,8 @@ let currentOutline: Point[] | null = null;
 
 clearCanvases();
 
+const viewerElement = document.querySelector<HTMLElement>('#viewer')!;
+createViewer(viewerElement);
 imageInput.addEventListener('change', () => {
   const file = imageInput.files?.[0];
 
@@ -103,6 +124,7 @@ imageInput.addEventListener('change', () => {
 });
 
 traceButton.addEventListener('click', traceImage);
+exportStlButton.addEventListener('click', exportCurrentPreviewAsSTL);
 
 thresholdSlider.addEventListener('input', () => {
   thresholdLabel.textContent = thresholdSlider.value;
@@ -146,6 +168,7 @@ function traceImage() {
   currentOutline = smoothed;
 
   drawOutline(smoothed);
+  showClickerPreview(smoothed, sourceCanvas);
   statusText.textContent = `Outline ready: ${smoothed.length} points`;
 }
 
