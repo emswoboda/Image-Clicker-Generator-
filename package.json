@@ -19,6 +19,9 @@
     "imagetracerjs": "^1.2.6",
     "jszip": "^3.10.1",
     "manifold-3d": "^3.5.1",
+    "polygon-clipping": "^0.15.7",
+    "potrace": "^2.1.8",
+    "simplify-js": "^1.2.4",
     "three": "^0.185.1"
   }
 }

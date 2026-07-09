@@ -3,6 +3,7 @@ import {
   createViewer,
   showClickerPreview,
   exportCurrentPreviewAsSTL,
+  exportCurrentPreviewAs3MF,
 } from './viewer';
 
 
@@ -49,6 +50,7 @@ app.innerHTML = `
 
           <button id="traceButton">Trace / Update Preview</button>
           <button id="exportStlButton" type="button">Download STL</button>
+          <button id="export3mfButton" type="button">Download 3MF</button>
 
           <p id="statusText" class="status">Waiting for image...</p>
         </aside>
@@ -83,6 +85,7 @@ app.innerHTML = `
 const imageInput = document.querySelector<HTMLInputElement>('#imageInput')!;
 const traceButton = document.querySelector<HTMLButtonElement>('#traceButton')!;
 const exportStlButton = document.querySelector<HTMLButtonElement>('#exportStlButton')!;
+const export3mfButton = document.querySelector<HTMLButtonElement>('#export3mfButton')!;
 
 const thresholdSlider = document.querySelector<HTMLInputElement>('#thresholdSlider')!;
 const mergeSlider = document.querySelector<HTMLInputElement>('#mergeSlider')!;
@@ -100,7 +103,6 @@ const sourceCtx = sourceCanvas.getContext('2d', { willReadFrequently: true })!;
 const outlineCtx = outlineCanvas.getContext('2d')!;
 
 let loadedImage: HTMLImageElement | null = null;
-let currentOutline: Point[] | null = null;
 
 clearCanvases();
 
@@ -125,6 +127,7 @@ imageInput.addEventListener('change', () => {
 
 traceButton.addEventListener('click', traceImage);
 exportStlButton.addEventListener('click', exportCurrentPreviewAsSTL);
+export3mfButton.addEventListener('click', exportCurrentPreviewAs3MF);
 
 thresholdSlider.addEventListener('input', () => {
   thresholdLabel.textContent = thresholdSlider.value;
@@ -141,7 +144,7 @@ smoothSlider.addEventListener('input', () => {
   traceImage();
 });
 
-function traceImage() {
+async function traceImage() {
   if (!loadedImage) {
     return;
   }
@@ -155,8 +158,7 @@ function traceImage() {
   const component = getLargestComponent(mergedMask.data, mergedMask.width, mergedMask.height);
 
   if (!component || component.pixels.length < 50) {
-    currentOutline = null;
-    clearOutlineCanvas();
+      clearOutlineCanvas();
     statusText.textContent = 'No clear object found.';
     return;
   }
@@ -165,10 +167,9 @@ function traceImage() {
   const simplified = simplifyRadialOutline(boundary, 240);
   const smoothed = smoothOutline(simplified, Number(smoothSlider.value));
 
-  currentOutline = smoothed;
 
   drawOutline(smoothed);
-  showClickerPreview(smoothed, sourceCanvas);
+  await showClickerPreview(smoothed, sourceCanvas);
   statusText.textContent = `Outline ready: ${smoothed.length} points`;
 }
 

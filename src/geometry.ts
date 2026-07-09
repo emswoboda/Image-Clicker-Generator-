@@ -74,15 +74,10 @@ export function pointsToMillimeters(
   const w = maxX - minX;
   const h = maxY - minY;
 
-  const longSide = Math.max(w, h);
-  const shortSide = Math.min(w, h);
+   const shortSide = Math.min(w, h);
 
-  let scale = targetMaxSize / longSide;
-
-  if (minShortSide > 0 && shortSide * scale < minShortSide) {
-    scale = minShortSide / shortSide;
-  }
-
+  const targetShortSide = minShortSide || targetMaxSize;
+  const scale = targetShortSide / shortSide;
   const center = weightedVisualCenter(points);
 
   const mm = points.map((p) => ({

@@ -1,11 +1,7 @@
 export const CLICKER = {
   // Outside generated image-shape sizes
-  capMaxSize: 40,
-  baseMaxSize: 50,
-
-  // Prevent skinny images from making the switch housing break through the sides
- capMinShortSide: 42,
-baseMinShortSide: 50,
+  capEdgeGap: 6,
+  baseEdgeGap: 6,
 
   // Top cap
   capTotalHeight: 8,
